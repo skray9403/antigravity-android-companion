@@ -32,14 +32,20 @@ class MainScreenViewModel(
     private val _isQuickCommandSheetVisible = MutableStateFlow(false)
     private val _userNotice = MutableStateFlow<String?>(null)
 
-    val uiState: StateFlow<MainUiState> = combine(
+    private val sessionStateFlow = combine(
         dataRepository.sessions,
         dataRepository.activeSession,
-        dataRepository.logs,
+        dataRepository.logs
+    ) { sessions, activeSession, logs ->
+        Triple(sessions, activeSession, logs)
+    }
+
+    val uiState: StateFlow<MainUiState> = combine(
+        sessionStateFlow,
         _currentTab,
         _isQuickCommandSheetVisible,
         _userNotice
-    ) { sessions, activeSession, logs, tab, showSheet, notice ->
+    ) { (sessions, activeSession, logs), tab, showSheet, notice ->
         MainUiState(
             sessions = sessions,
             activeSession = activeSession,
