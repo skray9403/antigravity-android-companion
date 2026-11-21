@@ -1,11 +1,11 @@
 package com.google.antigravity.companion.ui.main
 
-import com.google.antigravity.companion.CompanionNavKey
 import com.google.antigravity.companion.data.DefaultDataRepository
 import com.google.antigravity.companion.data.SessionStatus
 import junit.framework.TestCase.assertEquals
 import junit.framework.TestCase.assertNotNull
 import junit.framework.TestCase.assertNull
+import junit.framework.TestCase.assertTrue
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
@@ -13,58 +13,64 @@ import org.junit.Test
 class MainScreenViewModelTest {
 
     @Test
-    fun uiState_initiallyLoadsSessionsAndDefaultTab() = runTest {
+    fun repository_loadsInitialSessionsAndActiveSession() = runTest {
         val repository = DefaultDataRepository()
-        val viewModel = MainScreenViewModel(repository)
 
-        val state = viewModel.uiState.first()
-        assertEquals(CompanionNavKey.WebPortal, state.currentTab)
-        assertNotNull(state.activeSession)
-        assertEquals("Studio Workstation", state.activeSession?.name)
-        assertEquals(3, state.sessions.size)
+        val sessions = repository.sessions.first()
+        val active = repository.activeSession.first()
+
+        assertEquals(3, sessions.size)
+        assertNotNull(active)
+        assertEquals("Studio Workstation", active?.name)
+        assertEquals(SessionStatus.WAITING_APPROVAL, active?.status)
     }
 
     @Test
-    fun selectTab_updatesCurrentTab() = runTest {
+    fun repository_approvesPendingToolExecution() = runTest {
         val repository = DefaultDataRepository()
-        val viewModel = MainScreenViewModel(repository)
+        val active = repository.activeSession.first()
+        assertNotNull(active?.pendingApproval)
 
-        viewModel.selectTab(CompanionNavKey.DesktopRemote)
-        assertEquals(CompanionNavKey.DesktopRemote, viewModel.uiState.first().currentTab)
+        val reqId = active!!.pendingApproval!!.id
+        repository.approvePendingTool(active.id, reqId)
 
-        viewModel.selectTab(CompanionNavKey.Settings)
-        assertEquals(CompanionNavKey.Settings, viewModel.uiState.first().currentTab)
+        val updated = repository.activeSession.first()
+        assertNull(updated?.pendingApproval)
+        assertEquals(SessionStatus.RUNNING, updated?.status)
+        assertTrue(updated?.activeTask?.contains("Approved") == true)
     }
 
     @Test
-    fun approveTool_resolvesPendingApprovalAndUpdatesStatus() = runTest {
+    fun repository_deniesPendingToolExecution() = runTest {
         val repository = DefaultDataRepository()
-        val viewModel = MainScreenViewModel(repository)
+        val active = repository.activeSession.first()
+        assertNotNull(active?.pendingApproval)
 
-        val initialSession = viewModel.uiState.first().activeSession
-        assertNotNull(initialSession?.pendingApproval)
+        val reqId = active!!.pendingApproval!!.id
+        repository.denyPendingTool(active.id, reqId)
 
-        val reqId = initialSession!!.pendingApproval!!.id
-        viewModel.approveTool(initialSession.id, reqId)
-
-        val updatedSession = viewModel.uiState.first().activeSession
-        assertNull(updatedSession?.pendingApproval)
-        assertEquals(SessionStatus.RUNNING, updatedSession?.status)
+        val updated = repository.activeSession.first()
+        assertNull(updated?.pendingApproval)
+        assertEquals(SessionStatus.IDLE, updated?.status)
     }
 
     @Test
-    fun denyTool_cancelsPendingApproval() = runTest {
+    fun repository_sendsPromptAndUpdatesTask() = runTest {
         val repository = DefaultDataRepository()
-        val viewModel = MainScreenViewModel(repository)
+        val active = repository.activeSession.first()
+        assertNotNull(active)
 
-        val initialSession = viewModel.uiState.first().activeSession
-        assertNotNull(initialSession?.pendingApproval)
+        repository.sendPromptToDesktop(active!!.id, "Run security audit")
+        val updated = repository.activeSession.first()
+        assertEquals(SessionStatus.RUNNING, updated?.status)
+        assertTrue(updated?.activeTask?.contains("Run security audit") == true)
+    }
 
-        val reqId = initialSession!!.pendingApproval!!.id
-        viewModel.denyTool(initialSession.id, reqId)
-
-        val updatedSession = viewModel.uiState.first().activeSession
-        assertNull(updatedSession?.pendingApproval)
-        assertEquals(SessionStatus.IDLE, updatedSession?.status)
+    @Test
+    fun repository_providesQuickCommands() {
+        val repository = DefaultDataRepository()
+        assertEquals(8, repository.quickCommands.size)
+        assertTrue(repository.quickCommands.any { it.command == "/goal" })
+        assertTrue(repository.quickCommands.any { it.command == "/plan" })
     }
 }
