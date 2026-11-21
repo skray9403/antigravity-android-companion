@@ -27,8 +27,9 @@ jobs:
           distribution: 'temurin'
           cache: 'gradle'
 
-      - name: Setup Android SDK
-        uses: android-actions/setup-android@v3
+      - name: Accept Android SDK Licenses
+        run: |
+          yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses || true
 
       - name: Grant Execute Permission for Gradlew
         run: chmod +x gradlew
@@ -57,7 +58,7 @@ jobs:
         run: |
           echo "### 🚀 Antigravity Companion APK Build Complete!" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "The Antigravity Companion Android app has been built successfully." >> $GITHUB_STEP_SUMMARY
+          echo "The Antigravity Companion Android app has been built successfully in the cloud." >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "#### Built Artifacts:" >> $GITHUB_STEP_SUMMARY
           echo "- **Debug APK**: Pre-signed for direct side-loading on Android devices and emulators." >> $GITHUB_STEP_SUMMARY
