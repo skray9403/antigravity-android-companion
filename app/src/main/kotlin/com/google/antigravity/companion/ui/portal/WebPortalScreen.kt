@@ -18,25 +18,22 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowForward
-import androidx.compose.material.icons.filled.Bolt
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.RocketLaunch
 import androidx.compose.material3.Button
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -47,14 +44,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
-import com.google.antigravity.companion.ui.theme.AntigravityBorder
-import com.google.antigravity.companion.ui.theme.AntigravityCyan
-import com.google.antigravity.companion.ui.theme.AntigravityGreen
-import com.google.antigravity.companion.ui.theme.AntigravityPurple
-import com.google.antigravity.companion.ui.theme.AntigravitySurface
-import com.google.antigravity.companion.ui.theme.AntigravitySurfaceElevated
 import com.google.antigravity.companion.web.AntigravityJsBridge
 import com.google.antigravity.companion.web.AntigravityWebChromeClient
 import com.google.antigravity.companion.web.AntigravityWebClient
@@ -63,7 +55,6 @@ import com.google.antigravity.companion.web.AntigravityWebClient
 @SuppressLint("SetJavaScriptEnabled")
 @Composable
 fun WebPortalScreen(
-    onOpenSlashCommands: () -> Unit,
     onNavigateToRemote: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -76,140 +67,106 @@ fun WebPortalScreen(
     var canGoBack by remember { mutableStateOf(false) }
     var canGoForward by remember { mutableStateOf(false) }
 
-    // Handle Android system back gesture to navigate web history
+    // Intercept back gesture to navigate web history
     BackHandler(enabled = canGoBack) {
         webViewInstance?.let {
-            if (it.canGoBack()) {
-                it.goBack()
-            }
+            if (it.canGoBack()) it.goBack()
         }
     }
 
     Box(modifier = modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
         Column(modifier = Modifier.fillMaxSize()) {
-            // Sleek Top App Bar for Antigravity Portal
-            Surface(
-                color = AntigravitySurface,
-                modifier = Modifier.fillMaxWidth(),
-                tonalElevation = 4.dp
-            ) {
-                Column(modifier = Modifier.fillMaxWidth()) {
+            // Google-style clean Top App Bar
+            TopAppBar(
+                title = {
                     Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 12.dp, vertical = 8.dp),
                         verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.SpaceBetween
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(8.dp),
-                            modifier = Modifier.weight(1f)
-                        ) {
-                            Box(
-                                modifier = Modifier
-                                    .size(32.dp)
-                                    .clip(CircleShape)
-                                    .background(AntigravityPurple),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.RocketLaunch,
-                                    contentDescription = "Antigravity",
-                                    tint = Color.White,
-                                    modifier = Modifier.size(18.dp)
-                                )
-                            }
-                            Column {
-                                Row(
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.spacedBy(6.dp)
-                                ) {
-                                    Text(
-                                        text = "Antigravity Web",
-                                        style = MaterialTheme.typography.titleMedium,
-                                        color = MaterialTheme.colorScheme.onSurface
-                                    )
-                                    Box(
-                                        modifier = Modifier
-                                            .size(8.dp)
-                                            .clip(CircleShape)
-                                            .background(AntigravityGreen)
-                                    )
-                                }
-                                Text(
-                                    text = pageTitle,
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    maxLines = 1
-                                )
-                            }
-                        }
-
-                        // Web Navigation controls
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            IconButton(
-                                onClick = { webViewInstance?.goBack() },
-                                enabled = canGoBack
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.ArrowBack,
-                                    contentDescription = "Back",
-                                    tint = if (canGoBack) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
-                                )
-                            }
-                            IconButton(
-                                onClick = { webViewInstance?.goForward() },
-                                enabled = canGoForward
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.ArrowForward,
-                                    contentDescription = "Forward",
-                                    tint = if (canGoForward) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
-                                )
-                            }
-                            IconButton(
-                                onClick = {
-                                    errorMessage = null
-                                    webViewInstance?.reload()
-                                }
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.Refresh,
-                                    contentDescription = "Refresh",
-                                    tint = MaterialTheme.colorScheme.onSurface
-                                )
-                            }
-                            IconButton(
-                                onClick = {
-                                    errorMessage = null
-                                    webViewInstance?.loadUrl(portalUrl)
-                                }
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.Home,
-                                    contentDescription = "Home",
-                                    tint = AntigravityCyan
-                                )
-                            }
-                        }
-                    }
-
-                    // Loading progress indicator
-                    AnimatedVisibility(visible = isLoading && loadingProgress < 100) {
-                        LinearProgressIndicator(
-                            progress = { loadingProgress / 100f },
+                        Box(
                             modifier = Modifier
-                                .fillMaxWidth()
-                                .height(2.dp),
-                            color = AntigravityCyan,
-                            trackColor = Color.Transparent
+                                .size(28.dp)
+                                .clip(CircleShape)
+                                .background(MaterialTheme.colorScheme.primary),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.RocketLaunch,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.onPrimary,
+                                modifier = Modifier.size(16.dp)
+                            )
+                        }
+                        Text(
+                            text = "Antigravity",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Medium,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                        Box(
+                            modifier = Modifier
+                                .size(8.dp)
+                                .clip(CircleShape)
+                                .background(Color(0xFF10B981))
                         )
                     }
-                }
+                },
+                actions = {
+                    IconButton(
+                        onClick = { webViewInstance?.goBack() },
+                        enabled = canGoBack
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.ArrowBack,
+                            contentDescription = "Back",
+                            tint = if (canGoBack) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
+                        )
+                    }
+                    IconButton(
+                        onClick = { webViewInstance?.goForward() },
+                        enabled = canGoForward
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.ArrowForward,
+                            contentDescription = "Forward",
+                            tint = if (canGoForward) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
+                        )
+                    }
+                    IconButton(
+                        onClick = {
+                            errorMessage = null
+                            webViewInstance?.reload()
+                        }
+                    ) {
+                        Icon(imageVector = Icons.Default.Refresh, contentDescription = "Refresh")
+                    }
+                    IconButton(
+                        onClick = {
+                            errorMessage = null
+                            webViewInstance?.loadUrl(portalUrl)
+                        }
+                    ) {
+                        Icon(imageVector = Icons.Default.Home, contentDescription = "Home", tint = MaterialTheme.colorScheme.primary)
+                    }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.surfaceContainer
+                )
+            )
+
+            // Linear Progress Indicator
+            AnimatedVisibility(visible = isLoading && loadingProgress < 100) {
+                LinearProgressIndicator(
+                    progress = { loadingProgress / 100f },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(2.dp),
+                    color = MaterialTheme.colorScheme.primary,
+                    trackColor = Color.Transparent
+                )
             }
 
-            // Main Webview Container
+            // WebView
             Box(modifier = Modifier.weight(1f).fillMaxWidth()) {
                 AndroidView(
                     factory = { ctx ->
@@ -234,7 +191,6 @@ fun WebPortalScreen(
                                 allowFileAccess = true
                             }
 
-                            // Add custom Antigravity JS bridge
                             addJavascriptInterface(
                                 AntigravityJsBridge(
                                     context = ctx,
@@ -274,87 +230,38 @@ fun WebPortalScreen(
                     modifier = Modifier.fillMaxSize()
                 )
 
-                // Error Overlay
+                // Error overlay if network fails
                 if (errorMessage != null) {
                     Box(
                         modifier = Modifier
                             .fillMaxSize()
-                            .background(AntigravitySurface.copy(alpha = 0.95f))
-                            .padding(24.dp),
+                            .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.95f))
+                            .padding(32.dp),
                         contentAlignment = Alignment.Center
                     ) {
-                        Card(
-                            colors = CardDefaults.cardColors(containerColor = AntigravitySurfaceElevated),
-                            shape = RoundedCornerShape(16.dp),
-                            modifier = Modifier.fillMaxWidth()
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.spacedBy(16.dp)
                         ) {
-                            Column(
-                                modifier = Modifier.padding(24.dp),
-                                horizontalAlignment = Alignment.CenterHorizontally,
-                                verticalArrangement = Arrangement.spacedBy(16.dp)
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.RocketLaunch,
-                                    contentDescription = null,
-                                    tint = AntigravityPurple,
-                                    modifier = Modifier.size(48.dp)
-                                )
-                                Text(
-                                    text = "Connecting to Antigravity",
-                                    style = MaterialTheme.typography.titleLarge,
-                                    color = MaterialTheme.colorScheme.onSurface
-                                )
-                                Text(
-                                    text = errorMessage ?: "Waiting for network connectivity to sync web session.",
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
-                                Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                                    Button(
-                                        onClick = {
-                                            errorMessage = null
-                                            webViewInstance?.loadUrl(portalUrl)
-                                        }
-                                    ) {
-                                        Text("Retry")
-                                    }
-                                    Button(
-                                        onClick = onNavigateToRemote
-                                    ) {
-                                        Text("Open Desktop Remote")
-                                    }
-                                }
+                            Text(
+                                text = "Unable to connect",
+                                style = MaterialTheme.typography.titleLarge,
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                            Text(
+                                text = errorMessage ?: "Check network connection.",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                            Button(onClick = {
+                                errorMessage = null
+                                webViewInstance?.loadUrl(portalUrl)
+                            }) {
+                                Text("Retry")
                             }
                         }
                     }
                 }
-            }
-        }
-
-        // Floating Quick Command & Desktop Launcher Pill
-        FloatingActionButton(
-            onClick = onOpenSlashCommands,
-            containerColor = AntigravityPurple,
-            contentColor = Color.White,
-            shape = RoundedCornerShape(16.dp),
-            modifier = Modifier
-                .align(Alignment.BottomEnd)
-                .padding(end = 16.dp, bottom = 20.dp)
-        ) {
-            Row(
-                modifier = Modifier.padding(horizontal = 14.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Bolt,
-                    contentDescription = "Quick Slash Command",
-                    modifier = Modifier.size(20.dp)
-                )
-                Text(
-                    text = "Commands",
-                    style = MaterialTheme.typography.labelLarge
-                )
             }
         }
     }
