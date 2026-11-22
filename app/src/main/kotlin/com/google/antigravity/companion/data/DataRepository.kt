@@ -18,83 +18,19 @@ interface DataRepository {
     suspend fun triggerSlashCommand(sessionId: String, command: String)
     suspend fun updateHostConfig(sessionId: String, newHost: String, newName: String)
     suspend fun addSession(name: String, host: String)
+    suspend fun removeSession(sessionId: String)
 }
 
 class DefaultDataRepository : DataRepository {
 
-    private val _sessions = MutableStateFlow<List<DesktopSession>>(
-        listOf(
-            DesktopSession(
-                id = "desktop-main",
-                name = "Studio Workstation",
-                hostUrl = "http://192.168.1.105:8080",
-                status = SessionStatus.WAITING_APPROVAL,
-                activeTask = "Refactoring Gradle build and generating CI/CD workflows",
-                currentWorkspace = "C:\\Projects\\Antigravity",
-                pendingApproval = ToolApprovalRequest(
-                    id = "req-9821",
-                    toolName = "run_command",
-                    commandOrDetails = "git push -u origin main && ./gradlew assembleRelease",
-                    riskLevel = RiskLevel.CRITICAL
-                ),
-                tokenUsage = TokenUsage(
-                    inputTokens = 42800,
-                    outputTokens = 6910,
-                    estimatedCostUsd = 0.04
-                ),
-                subagentsCount = 2,
-                isPrimary = true
-            ),
-            DesktopSession(
-                id = "desktop-laptop",
-                name = "MacBook Pro Dev",
-                hostUrl = "http://192.168.1.142:8080",
-                status = SessionStatus.RUNNING,
-                activeTask = "Background unit test suite execution on module :core",
-                currentWorkspace = "/Users/developer/code/antigravity-core",
-                pendingApproval = null,
-                tokenUsage = TokenUsage(
-                    inputTokens = 18450,
-                    outputTokens = 2390,
-                    estimatedCostUsd = 0.01
-                ),
-                subagentsCount = 1,
-                isPrimary = false
-            ),
-            DesktopSession(
-                id = "cloud-devbox",
-                name = "Cloud GPU Instance (A100)",
-                hostUrl = "https://cloud-agent.internal.net:8443",
-                status = SessionStatus.IDLE,
-                activeTask = "Standing by for distributed swarm inference task",
-                currentWorkspace = "/workspace/antigravity-swarm",
-                pendingApproval = null,
-                tokenUsage = TokenUsage(
-                    inputTokens = 91200,
-                    outputTokens = 15300,
-                    estimatedCostUsd = 0.12
-                ),
-                subagentsCount = 0,
-                isPrimary = false
-            )
-        )
-    )
+    private val _sessions = MutableStateFlow<List<DesktopSession>>(emptyList())
     override val sessions: Flow<List<DesktopSession>> = _sessions.asStateFlow()
 
-    private val _activeSessionId = MutableStateFlow("desktop-main")
-    private val _activeSession = MutableStateFlow<DesktopSession?>(_sessions.value.firstOrNull())
+    private val _activeSessionId = MutableStateFlow("")
+    private val _activeSession = MutableStateFlow<DesktopSession?>(null)
     override val activeSession: Flow<DesktopSession?> = _activeSession.asStateFlow()
 
-    private val _logs = MutableStateFlow<List<TerminalLogEntry>>(
-        listOf(
-            TerminalLogEntry("01:39:12", "INFO", "Antigravity daemon connected via secure WebSocket channel"),
-            TerminalLogEntry("01:39:15", "AGENT", "Received user prompt: 'Configure companion app & CI pipeline'"),
-            TerminalLogEntry("01:39:18", "TOOL", "Tool invoked: run_command [CommandLine='android info']"),
-            TerminalLogEntry("01:39:24", "TOOL", "Tool output: Android SDK 37 detected; OpenJDK 21 LTS active"),
-            TerminalLogEntry("01:39:45", "AGENT", "Synthesized project structure. Requesting permission to build APK..."),
-            TerminalLogEntry("01:40:02", "WARN", "Awaiting approval: run_command [CommandLine='git push origin main']")
-        )
-    )
+    private val _logs = MutableStateFlow<List<TerminalLogEntry>>(emptyList())
     override val logs: Flow<List<TerminalLogEntry>> = _logs.asStateFlow()
 
     override val quickCommands: List<QuickSlashCommand> = listOf(
@@ -223,14 +159,34 @@ class DefaultDataRepository : DataRepository {
     override suspend fun addSession(name: String, host: String) {
         val newSession = DesktopSession(
             id = "desktop-${System.currentTimeMillis()}",
-            name = name,
-            hostUrl = host,
+            name = name.ifBlank { "My Workstation" },
+            hostUrl = host.ifBlank { "http://127.0.0.1:8080" },
             status = SessionStatus.IDLE,
-            activeTask = "Newly paired session",
+            activeTask = "Standing by for instructions",
             currentWorkspace = "Default Workspace",
             tokenUsage = TokenUsage(0, 0, 0.0),
-            isPrimary = false
+            isPrimary = _sessions.value.isEmpty()
         )
         _sessions.update { it + newSession }
+        if (_activeSessionId.value.isEmpty() || _activeSession.value == null) {
+            _activeSessionId.value = newSession.id
+            _activeSession.value = newSession
+        }
+        _logs.update {
+            it + TerminalLogEntry(
+                timestamp = "Now",
+                level = "INFO",
+                message = "Connected to ${newSession.name} (${newSession.hostUrl})"
+            )
+        }
+    }
+
+    override suspend fun removeSession(sessionId: String) {
+        _sessions.update { list -> list.filter { it.id != sessionId } }
+        if (_activeSessionId.value == sessionId) {
+            val next = _sessions.value.firstOrNull()
+            _activeSessionId.value = next?.id ?: ""
+            _activeSession.value = next
+        }
     }
 }

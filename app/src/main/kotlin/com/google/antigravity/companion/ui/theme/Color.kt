@@ -2,87 +2,69 @@ package com.google.antigravity.companion.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-// Antigravity Dark Futuristic Theme Palette
-val AntigravityBg = Color(0xFF090A0F)
-val AntigravitySurface = Color(0xFF11141D)
-val AntigravitySurfaceCard = Color(0xFF171B27)
-val AntigravitySurfaceElevated = Color(0xFF1F2536)
-val AntigravityBorder = Color(0xFF283046)
+// Authentic Material 3 Expressive Tonal Tokens (Google Dark Palette)
+val GoogleDarkBackground = Color(0xFF111318)
+val GoogleDarkSurface = Color(0xFF111318)
+val GoogleDarkSurfaceContainer = Color(0xFF1D2024)
+val GoogleDarkSurfaceContainerHigh = Color(0xFF282A2F)
+val GoogleDarkSurfaceContainerHighest = Color(0xFF33353A)
+val GoogleDarkOutline = Color(0xFF8C9199)
+val GoogleDarkOutlineVariant = Color(0xFF43474E)
 
-// Antigravity Brand Accents
-val AntigravityPurple = Color(0xFF8B5CF6)
-val AntigravityPurpleLight = Color(0xFFA78BFA)
-val AntigravityPurpleContainer = Color(0xFF3B1E78)
-val AntigravityCyan = Color(0xFF06B6D4)
-val AntigravityCyanGlow = Color(0xFF22D3EE)
-val AntigravityCyanContainer = Color(0xFF08434D)
+// Material 3 Expressive Primary (Google Blue 80 - Clean, Restrained, Non-Gaudy)
+val primaryDark = Color(0xFFA8C7FA)
+val onPrimaryDark = Color(0xFF062E6F)
+val primaryContainerDark = Color(0xFF1E3A5F)
+val onPrimaryContainerDark = Color(0xFFD3E3FD)
 
-// Status & Indicators
-val AntigravityGreen = Color(0xFF10B981)
-val AntigravityGreenContainer = Color(0xFF064E3B)
-val AntigravityAmber = Color(0xFFF59E0B)
-val AntigravityAmberContainer = Color(0xFF78350F)
-val AntigravityPink = Color(0xFFEC4899)
-val AntigravityError = Color(0xFFEF4444)
-val AntigravityErrorContainer = Color(0xFF7F1D1D)
+// Material 3 Secondary (Tonal Slate/Sky)
+val secondaryDark = Color(0xFF7FCFFF)
+val onSecondaryDark = Color(0xFF00344F)
+val secondaryContainerDark = Color(0xFF004A77)
+val onSecondaryContainerDark = Color(0xFFC7E7FF)
 
-// Text
-val AntigravityTextPrimary = Color(0xFFF1F5F9)
-val AntigravityTextSecondary = Color(0xFF94A3B8)
-val AntigravityTextMuted = Color(0xFF64748B)
+// Material 3 Tertiary (Soft Coral / Amber Accent)
+val tertiaryDark = Color(0xFFFFB77C)
+val onTertiaryDark = Color(0xFF4D2600)
+val tertiaryContainerDark = Color(0xFF6E3900)
+val onTertiaryContainerDark = Color(0xFFFFDCC1)
 
-// Material 3 Mappings
-val primaryDark = AntigravityPurpleLight
-val onPrimaryDark = Color(0xFF1E103A)
-val primaryContainerDark = AntigravityPurpleContainer
-val onPrimaryContainerDark = Color(0xFFEDE9FE)
+val backgroundDark = GoogleDarkBackground
+val onBackgroundDark = Color(0xFFE2E2E9)
+val surfaceDark = GoogleDarkSurface
+val onSurfaceDark = Color(0xFFE2E2E9)
+val surfaceVariantDark = GoogleDarkSurfaceContainerHigh
+val onSurfaceVariantDark = Color(0xFFC3C7CF)
 
-val secondaryDark = AntigravityCyanGlow
-val onSecondaryDark = Color(0xFF042F37)
-val secondaryContainerDark = AntigravityCyanContainer
-val onSecondaryContainerDark = Color(0xFFCFFAFE)
+val errorDark = Color(0xFFFFB4AB)
+val onErrorDark = Color(0xFF690005)
+val errorContainerDark = Color(0xFF93000A)
+val onErrorContainerDark = Color(0xFFFFDAD6)
 
-val tertiaryDark = AntigravityAmber
-val onTertiaryDark = Color(0xFF451A03)
-val tertiaryContainerDark = AntigravityAmberContainer
-val onTertiaryContainerDark = Color(0xFFFEF3C7)
-
-val backgroundDark = AntigravityBg
-val onBackgroundDark = AntigravityTextPrimary
-val surfaceDark = AntigravitySurface
-val onSurfaceDark = AntigravityTextPrimary
-val surfaceVariantDark = AntigravitySurfaceCard
-val onSurfaceVariantDark = AntigravityTextSecondary
-
-val errorDark = AntigravityError
-val onErrorDark = Color(0xFF450A0A)
-val errorContainerDark = AntigravityErrorContainer
-val onErrorContainerDark = Color(0xFFFEE2E2)
-
-// Light Theme Fallbacks
-val primaryLight = Color(0xFF6D28D9)
+// Light Palette Baseline Fallbacks
+val primaryLight = Color(0xFF0B57D0)
 val onPrimaryLight = Color.White
-val primaryContainerLight = Color(0xFFEDE9FE)
-val onPrimaryContainerLight = Color(0xFF2E1065)
+val primaryContainerLight = Color(0xFFD3E3FD)
+val onPrimaryContainerLight = Color(0xFF041E49)
 
-val secondaryLight = Color(0xFF0891B2)
+val secondaryLight = Color(0xFF00639B)
 val onSecondaryLight = Color.White
-val secondaryContainerLight = Color(0xFFCFFAFE)
-val onSecondaryContainerLight = Color(0xFF164E63)
+val secondaryContainerLight = Color(0xFFC7E7FF)
+val onSecondaryContainerLight = Color(0xFF001D32)
 
-val tertiaryLight = Color(0xFFD97706)
+val tertiaryLight = Color(0xFF8F4D00)
 val onTertiaryLight = Color.White
-val tertiaryContainerLight = Color(0xFFFEF3C7)
-val onTertiaryContainerLight = Color(0xFF78350F)
+val tertiaryContainerLight = Color(0xFFFFDCC1)
+val onTertiaryContainerLight = Color(0xFF2E1500)
 
-val backgroundLight = Color(0xFFF8FAFC)
-val onBackgroundLight = Color(0xFF0F172A)
-val surfaceLight = Color(0xFFFFFFFF)
-val onSurfaceLight = Color(0xFF0F172A)
-val surfaceVariantLight = Color(0xFFE2E8F0)
-val onSurfaceVariantLight = Color(0xFF475569)
+val backgroundLight = Color(0xFFF8F9FF)
+val onBackgroundLight = Color(0xFF191C20)
+val surfaceLight = Color(0xFFF8F9FF)
+val onSurfaceLight = Color(0xFF191C20)
+val surfaceVariantLight = Color(0xFFE0E2EC)
+val onSurfaceVariantLight = Color(0xFF43474E)
 
-val errorLight = Color(0xFFDC2626)
+val errorLight = Color(0xFFBA1A1A)
 val onErrorLight = Color.White
-val errorContainerLight = Color(0xFFFEE2E2)
-val onErrorContainerLight = Color(0xFF7F1D1D)
+val errorContainerLight = Color(0xFFFFDAD6)
+val onErrorContainerLight = Color(0xFF410002)

@@ -20,16 +20,20 @@ class AntigravityWebClient(
                 if (!style) {
                     style = document.createElement('style');
                     style.id = 'antigravity-mobile-optimizations';
-                    style.innerHTML = `
+                    style.textContent = `
                         /* Antigravity Companion Mobile Optimization Engine */
                         * {
                             -webkit-tap-highlight-color: transparent !important;
                         }
                         
-                        /* Optimize scroll container for smooth mobile gestures */
+                        /* Optimize scroll container for smooth mobile gestures and safe status bar area */
                         html, body {
                             overscroll-behavior-y: contain;
                             -webkit-overflow-scrolling: touch;
+                        }
+
+                        body {
+                            padding-top: 40px !important;
                         }
                         
                         /* Ensure code blocks don't blow out mobile width and have horizontal scrolling */
@@ -59,7 +63,7 @@ class AntigravityWebClient(
                         
                         /* Responsive input adjustment for virtual keyboard */
                         textarea, input[type="text"] {
-                            font-size: 16px !important; /* Prevents iOS/Android auto-zoom on focus */
+                            font-size: 16px !important; /* Prevents auto-zoom on focus */
                         }
                     `;
                     document.head.appendChild(style);
@@ -85,7 +89,7 @@ class AntigravityWebClient(
                         input.value = cmd + ' ';
                         input.dispatchEvent(new Event('input', { bubbles: true }));
                     } else {
-                        input.innerText = cmd + ' ';
+                        input.textContent = cmd + ' ';
                         input.dispatchEvent(new Event('input', { bubbles: true }));
                     }
                 }

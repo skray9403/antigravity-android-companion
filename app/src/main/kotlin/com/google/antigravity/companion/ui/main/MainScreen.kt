@@ -61,12 +61,11 @@ fun MainScreen(
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
-        snackbarHost = { SnackbarHost(snackbarHostState) }
-    ) { innerPadding ->
+        snackbarHost = { SnackbarHost(snackbarHostState) },
+        contentWindowInsets = androidx.compose.foundation.layout.WindowInsets(0, 0, 0, 0)
+    ) { _ ->
         Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding)
+            modifier = Modifier.fillMaxSize()
         ) {
             // Main content depending on active tab
             when (uiState.currentTab) {
@@ -86,7 +85,8 @@ fun MainScreen(
                         onApproveTool = viewModel::approveTool,
                         onDenyTool = viewModel::denyTool,
                         onSendPrompt = viewModel::sendPrompt,
-                        onTriggerCommand = viewModel::triggerSlashCommand
+                        onTriggerCommand = viewModel::triggerSlashCommand,
+                        onAddNewSession = viewModel::addNewSession
                     )
                 }
 

@@ -13,50 +13,37 @@ import org.junit.Test
 class MainScreenViewModelTest {
 
     @Test
-    fun repository_loadsInitialSessionsAndActiveSession() = runTest {
+    fun repository_startsCleanWithNoPlaceholders() = runTest {
         val repository = DefaultDataRepository()
 
         val sessions = repository.sessions.first()
         val active = repository.activeSession.first()
+        val logs = repository.logs.first()
 
-        assertEquals(3, sessions.size)
+        assertEquals(0, sessions.size)
+        assertNull(active)
+        assertEquals(0, logs.size)
+    }
+
+    @Test
+    fun repository_addsAndSelectsSession() = runTest {
+        val repository = DefaultDataRepository()
+        repository.addSession("Office PC", "http://192.168.1.50:8080")
+
+        val sessions = repository.sessions.first()
+        val active = repository.activeSession.first()
+
+        assertEquals(1, sessions.size)
         assertNotNull(active)
-        assertEquals("Studio Workstation", active?.name)
-        assertEquals(SessionStatus.WAITING_APPROVAL, active?.status)
-    }
-
-    @Test
-    fun repository_approvesPendingToolExecution() = runTest {
-        val repository = DefaultDataRepository()
-        val active = repository.activeSession.first()
-        assertNotNull(active?.pendingApproval)
-
-        val reqId = active!!.pendingApproval!!.id
-        repository.approvePendingTool(active.id, reqId)
-
-        val updated = repository.activeSession.first()
-        assertNull(updated?.pendingApproval)
-        assertEquals(SessionStatus.RUNNING, updated?.status)
-        assertTrue(updated?.activeTask?.contains("Approved") == true)
-    }
-
-    @Test
-    fun repository_deniesPendingToolExecution() = runTest {
-        val repository = DefaultDataRepository()
-        val active = repository.activeSession.first()
-        assertNotNull(active?.pendingApproval)
-
-        val reqId = active!!.pendingApproval!!.id
-        repository.denyPendingTool(active.id, reqId)
-
-        val updated = repository.activeSession.first()
-        assertNull(updated?.pendingApproval)
-        assertEquals(SessionStatus.IDLE, updated?.status)
+        assertEquals("Office PC", active?.name)
+        assertEquals("http://192.168.1.50:8080", active?.hostUrl)
+        assertEquals(SessionStatus.IDLE, active?.status)
     }
 
     @Test
     fun repository_sendsPromptAndUpdatesTask() = runTest {
         val repository = DefaultDataRepository()
+        repository.addSession("Workstation", "http://127.0.0.1:8080")
         val active = repository.activeSession.first()
         assertNotNull(active)
 
@@ -72,5 +59,17 @@ class MainScreenViewModelTest {
         assertEquals(8, repository.quickCommands.size)
         assertTrue(repository.quickCommands.any { it.command == "/goal" })
         assertTrue(repository.quickCommands.any { it.command == "/plan" })
+    }
+
+    @Test
+    fun repository_removesSession() = runTest {
+        val repository = DefaultDataRepository()
+        repository.addSession("Workstation", "http://127.0.0.1:8080")
+        assertEquals(1, repository.sessions.first().size)
+
+        val id = repository.sessions.first().first().id
+        repository.removeSession(id)
+        assertEquals(0, repository.sessions.first().size)
+        assertNull(repository.activeSession.first())
     }
 }

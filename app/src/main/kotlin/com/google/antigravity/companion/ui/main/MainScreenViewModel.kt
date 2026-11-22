@@ -117,6 +117,13 @@ class MainScreenViewModel(
         }
     }
 
+    fun removeSession(sessionId: String) {
+        viewModelScope.launch {
+            dataRepository.removeSession(sessionId)
+            _userNotice.value = "Removed workstation session."
+        }
+    }
+
     fun clearNotice() {
         _userNotice.value = null
     }

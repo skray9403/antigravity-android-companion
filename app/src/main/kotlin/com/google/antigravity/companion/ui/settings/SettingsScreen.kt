@@ -4,11 +4,14 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -56,17 +59,19 @@ fun SettingsScreen(
     modifier: Modifier = Modifier
 ) {
     var showEditDialog by remember { mutableStateOf(false) }
-    var hostUrlInput by remember(activeSession) { mutableStateOf(activeSession?.hostUrl ?: "http://192.168.1.105:8080") }
-    var sessionNameInput by remember(activeSession) { mutableStateOf(activeSession?.name ?: "Studio Workstation") }
+    var hostUrlInput by remember(activeSession) { mutableStateOf(activeSession?.hostUrl ?: "http://192.168.1.100:8080") }
+    var sessionNameInput by remember(activeSession) { mutableStateOf(activeSession?.name ?: "Primary Workstation") }
 
     var enableMobileCss by remember { mutableStateOf(true) }
     var enableHaptics by remember { mutableStateOf(true) }
     var keepScreenAwake by remember { mutableStateOf(true) }
     var autoDiscoverLan by remember { mutableStateOf(true) }
 
+    val statusBarTopPadding = WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
+
     LazyColumn(
         modifier = modifier.fillMaxSize(),
-        contentPadding = PaddingValues(top = 24.dp, bottom = 120.dp)
+        contentPadding = PaddingValues(top = statusBarTopPadding + 16.dp, bottom = 120.dp)
     ) {
         // Page Header (Google Settings Style)
         item {
@@ -94,8 +99,8 @@ fun SettingsScreen(
 
         item {
             ListItem(
-                headlineContent = { Text(activeSession?.name ?: "Configure Host", fontWeight = FontWeight.Medium) },
-                supportingContent = { Text(activeSession?.hostUrl ?: "Tap to set pairing URL") },
+                headlineContent = { Text(activeSession?.name ?: "No Workstation Paired", fontWeight = FontWeight.Medium) },
+                supportingContent = { Text(activeSession?.hostUrl ?: "Tap to configure or pair desktop host") },
                 leadingContent = {
                     Icon(
                         imageVector = Icons.Default.Computer,
@@ -279,7 +284,11 @@ fun SettingsScreen(
             confirmButton = {
                 TextButton(
                     onClick = {
-                        activeSession?.let { onSaveHostConfig(it.id, hostUrlInput, sessionNameInput) }
+                        if (activeSession != null) {
+                            onSaveHostConfig(activeSession.id, hostUrlInput, sessionNameInput)
+                        } else {
+                            onAddNewSession(sessionNameInput, hostUrlInput)
+                        }
                         showEditDialog = false
                     }
                 ) {
